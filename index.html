@@ -17,9 +17,20 @@
   .viewer{margin-left:220px;padding:10px;}
   img.page-img{max-width:100%;border-radius:8px;margin-bottom:10px;}
   .nav{margin-top:10px;}
-  button{padding:6px 12px;margin-right:6px;border:none;border-radius:6px;background:#4a78ff;color:#fff;cursor:pointer;}
+  button{padding:8px 14px;margin-right:6px;border:none;border-radius:6px;background:#4a78ff;color:#fff;cursor:pointer;}
   #song-display{margin-top:5px;font-style:italic;}
   #music-label{margin-top:5px;font-weight:bold;color:#aaa;}
+
+  /* ===================== MOBILE STYLES ===================== */
+  @media (max-width: 768px) {
+    .sidebar {float:none;width:100%;margin-bottom:10px;}
+    .viewer {margin-left:0;padding:5px;}
+    button {padding:10px 16px;font-size:16px;margin-top:5px;}
+    .container {padding:10px;}
+    h1 {font-size:22px;}
+    .story-summary {font-size:14px;}
+    #music-label, #song-display {font-size:14px;}
+  }
 </style>
 </head>
 <body>
@@ -32,16 +43,15 @@
   </header>
 
   <!-- Music controls -->
-<div style="margin:10px 0;">
-  <div id="music-label">This is what Silver listens to:</div>
-  <div id="song-display">No song playing</div>
-  <button id="mute-btn">Mute</button>
-</div>
-<audio id="bg-audio" autoplay></audio>
-
+  <div style="margin:10px 0;">
+    <div id="music-label">This is what Silver listens to:</div>
+    <div id="song-display">No song playing</div>
+    <button id="mute-btn">Mute</button>
+  </div>
+  <audio id="bg-audio" autoplay></audio>
 
   <div class="sidebar" id="chapters-list">No chapters loaded</div>
-  <div class="viewer">
+  <div class="viewer" id="viewer">
     <div id="chapter-title"></div>
     <div id="page-container"></div>
     <div class="nav">
@@ -65,7 +75,8 @@ const els = {
   siteTitle: document.getElementById('site-title'),
   muteBtn: document.getElementById('mute-btn'),
   songDisplay: document.getElementById('song-display'),
-  audio: document.getElementById('bg-audio')
+  audio: document.getElementById('bg-audio'),
+  viewer: document.getElementById('viewer')
 };
 
 // Render sidebar
@@ -129,6 +140,30 @@ els.muteBtn.onclick = () => {
   els.audio.muted = !els.audio.muted;
   els.muteBtn.textContent = els.audio.muted ? "Unmute" : "Mute";
 };
+
+// ===================== SWIPE GESTURES FOR MOBILE =====================
+let touchStartX = 0;
+let touchEndX = 0;
+
+els.viewer.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+els.viewer.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleGesture();
+}, false);
+
+function handleGesture() {
+  if(touchEndX < touchStartX - 50){ // swipe left
+    const next = state.pageIndex + 1;
+    if(next < db.chapters[state.chapterIndex].pages.length) showPage(state.chapterIndex, next);
+  }
+  if(touchEndX > touchStartX + 50){ // swipe right
+    const prev = state.pageIndex - 1;
+    if(prev >= 0) showPage(state.chapterIndex, prev);
+  }
+}
 </script>
 </body>
 </html>
