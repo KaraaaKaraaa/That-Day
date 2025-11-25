@@ -111,42 +111,36 @@ renderChapters();
 showPage(0,0);
 
 // ===================== MUSIC =====================
-// Hardcoded song list as fallback
-let songs = [
+// List your songs manually here
+const songs = [
   'music/Sienna - The Marias.mp3',
+  'music/Let Down - Radiohead.mp3',
 ];
 
-fetch('music/')
-  .then(r => r.text())
-  .then(html => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html,'text/html');
-    const links = [...doc.querySelectorAll('a')];
-    const mp3s = links.map(l => l.getAttribute('href')).filter(f => f.endsWith('.mp3'));
-    if(mp3s.length > 0) songs = mp3s.map(f => 'music/' + f);
+// Pick a random song to start
+let songIndex = Math.floor(Math.random() * songs.length);
 
-    let songIndex = Math.floor(Math.random() * songs.length);
+function playSong(index){
+  els.audio.src = songs[index];
+  els.audio.play().catch(()=>{}); // attempt autoplay
+  const name = songs[index].split('/').pop().replace('.mp3','');
+  els.songDisplay.textContent = "Now Playing: " + name;
+}
 
-    function playSong(index){
-      els.audio.src = songs[index];
-      els.audio.play().catch(()=>{}); // attempt autoplay
-      const name = songs[index].split('/').pop().replace('.mp3','');
-      els.songDisplay.textContent = "Now Playing: " + name;
-    }
+// Cycle to next song when current ends
+els.audio.addEventListener('ended', () => {
+  songIndex = (songIndex + 1) % songs.length;
+  playSong(songIndex);
+});
 
-    els.audio.addEventListener('ended', () => {
-      songIndex = (songIndex + 1) % songs.length;
-      playSong(songIndex);
-    });
+// Initial song
+playSong(songIndex);
 
-    // Initial song
-    playSong(songIndex);
-
-    els.muteBtn.onclick = () => {
-      els.audio.muted = !els.audio.muted;
-      els.muteBtn.textContent = els.audio.muted ? "Unmute" : "Mute";
-    };
-  });
+// Mute/unmute toggle
+els.muteBtn.onclick = () => {
+  els.audio.muted = !els.audio.muted;
+  els.muteBtn.textContent = els.audio.muted ? "Unmute" : "Mute";
+};
 
 // ===================== SWIPE =====================
 let touchStartX = 0;
@@ -173,5 +167,6 @@ function handleGesture() {
   }
 }
 </script>
+
 </body>
 </html>
